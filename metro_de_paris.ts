@@ -2,6 +2,7 @@
 import {
   MinPriorityQueue, IGetCompareValue
 } from '@datastructures-js/priority-queue';
+let tree = new Array<node>()
 
 let distancesGraph = [
   [0, 11, 20, 27, 40, 43, 39, 28, 18, 10, 18, 30, 30, 32],
@@ -48,26 +49,27 @@ function Astar(start: node, end: node) {
   let frontier = new MinPriorityQueue<node>(compare)
   frontier.enqueue(start)
 
-  let explored = new Array<node>()
-
+  let explored = new Array<Number>()
   let steps = 0
+
   while(!frontier.isEmpty()) {
     let current = frontier.dequeue()
-    explored.push(current)
+    explored.push(current.index)
     steps++
 
-    console.log("Nó atual: "+ current.index)
+    console.log("Nó atual: "+ (current.index + 1))
 
     if(current.index == end.index) {
       console.log("Steps: " + steps)
       return
     }
 
-    for(let i = 0; i < current.neighbors.length; i++) {
-      let neighbor : node = current.neighbors[i]
-
-      if(!explored.includes(neighbor)) {
-        neighbor.gCost = current.gCost + neighbor.gCost
+    for(let i = 0; i < tree[current.index].neighbors.length; i++) {
+      let neighbor : node = tree[current.index].neighbors[i]
+      
+      if(!explored.includes(neighbor.index)) {
+        neighbor.gCost = tree[current.index].gCost + neighbor.gCost
+        tree[neighbor.index].gCost = neighbor.gCost
         neighbor.fCost = neighbor.gCost + neighbor.hCost
         frontier.enqueue(neighbor)
       }
@@ -77,11 +79,11 @@ function Astar(start: node, end: node) {
 
 function main() {
   let start = 0
-  let end = 1
+  let end = 11
 
   let adjacencyList = [
     [0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [11, 0, 9, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0],
+    [11, 0, 9, 0, 0, 0, 0, 0, 11, 4, 0, 0, 0, 0],
     [0, 9, 0, 7, 0, 0, 0, 0, 10, 0, 0, 0, 13, 0],
     [0, 0, 7, 0, 13, 0, 0, 13, 0, 0, 0, 0, 11, 0],
     [0, 0, 0, 13, 0, 3, 2, 21, 0, 0, 0, 0, 0, 0],
@@ -102,16 +104,20 @@ function main() {
     [11, 12, 13]
   ]
   
-  let tree = new Array<node>()
-  for(let i = 0; i < adjacencyList.length; i++) {
-    let newnode = new node(i, 0)
+  let n = adjacencyList[0].length
 
-    for(let j = 0; j < adjacencyList[i].length; j++) {
-      if(j != i) {
-        let neighbor = new node(j, distancesGraph[i][j])
+
+  for(let i = 0; i < n; i++) {
+    let newnode = new node(i, distancesGraph[i][end])
+
+    for(let j = 0; j < n; j++) {
+      if(adjacencyList[i][j] != 0) {
+
+        let neighbor = new node(j, distancesGraph[j][end])
         newnode.setNeighbors(neighbor, adjacencyList[i][j])
       }
     }
+
     tree.push(newnode)
   }
   
