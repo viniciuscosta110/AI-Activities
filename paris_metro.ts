@@ -21,6 +21,30 @@ let distancesGraph = [
   [32, 24, 18, 17, 20, 20, 17, 30, 28, 23, 39, 37, 5, 0]
 ]
 
+let adjacencyList = [
+  [0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [11, 0, 9, 0, 0, 0, 0, 0, 11, 4, 0, 0, 0, 0],
+  [0, 9, 0, 7, 0, 0, 0, 0, 10, 0, 0, 0, 13, 0],
+  [0, 0, 7, 0, 13, 0, 0, 13, 0, 0, 0, 0, 11, 0],
+  [0, 0, 0, 13, 0, 3, 2, 21, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 13, 21, 0, 0, 0, 9, 0, 0, 7, 0, 0],
+  [0, 0, 10, 0, 0, 0, 0, 9, 0, 0, 12, 0, 0, 0],
+  [0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0],
+  [0, 0, 13, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0]
+]
+
+let lines = [
+  [0, 1, 2, 3, 4, 5],
+  [1, 4, 6, 7, 8, 9],
+  [2, 8, 10, 12],
+  [3, 8, 11, 12, 13]
+]
+
 class node {
   public index : number
   public gCost : number = Number.MAX_VALUE
@@ -42,7 +66,7 @@ class node {
 
 const compare: IGetCompareValue<node> = (node) => node.fCost;
 
-function Astar(start: node, end: node) {
+function Astar(start: node, end: node, line: number) {
   start.gCost = 0
   start.fCost = start.hCost
 
@@ -54,6 +78,9 @@ function Astar(start: node, end: node) {
 
   while(!frontier.isEmpty()) {
     let current = frontier.dequeue()
+    frontier = new MinPriorityQueue<node>(compare)
+    let changeLine = 0
+
     explored.push(current.index)
     steps++
 
@@ -68,9 +95,30 @@ function Astar(start: node, end: node) {
       let neighbor : node = tree[current.index].neighbors[i]
       
       if(!explored.includes(neighbor.index)) {
-        neighbor.gCost = tree[current.index].gCost + neighbor.gCost
+
+        if(!lines[line].includes(neighbor.index)) {
+          changeLine = 4
+          
+          for(let j = 0; j < lines.length; j++) {
+            if(lines[j].includes(neighbor.index)) {
+              line = j
+              break
+            }
+          }
+        }
+        
+        neighbor.gCost = tree[current.index].gCost + neighbor.gCost + changeLine
         tree[neighbor.index].gCost = neighbor.gCost
         neighbor.fCost = neighbor.gCost + neighbor.hCost
+
+        let frontierSize = frontier.size();
+        
+        for(let j = 0; j < frontierSize; j++) {
+          if(frontier.toArray()[j].index == neighbor.index) {
+            frontier.toArray()[j] = neighbor
+          }
+        }
+
         frontier.enqueue(neighbor)
       }
     }
@@ -78,31 +126,9 @@ function Astar(start: node, end: node) {
 }
 
 function main() {
-  let start = 0
-  let end = 11
-
-  let adjacencyList = [
-    [0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [11, 0, 9, 0, 0, 0, 0, 0, 11, 4, 0, 0, 0, 0],
-    [0, 9, 0, 7, 0, 0, 0, 0, 10, 0, 0, 0, 13, 0],
-    [0, 0, 7, 0, 13, 0, 0, 13, 0, 0, 0, 0, 11, 0],
-    [0, 0, 0, 13, 0, 3, 2, 21, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 13, 21, 0, 0, 0, 9, 0, 0, 7, 0, 0],
-    [0, 0, 10, 0, 0, 0, 0, 9, 0, 0, 12, 0, 0, 0],
-    [0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0],
-    [0, 0, 13, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0]
-  ]
-
-  let lines = [
-    [0, 1, 2, 3, 4, 5],
-    [6, 7, 8, 9],
-    [11, 12, 13]
-  ]
+  let start = 12
+  let end = 9
+  let line = 0
   
   let n = adjacencyList[0].length
 
@@ -121,7 +147,7 @@ function main() {
     tree.push(newnode)
   }
   
-  Astar(tree[start], tree[end])
+  Astar(tree[start], tree[end], line)
 }
 
 main()
