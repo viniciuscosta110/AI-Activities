@@ -97,8 +97,16 @@ function Astar(start: node, end: node, line: number) {
       let neighbor : node = tree[current.index].neighbors[i]
       
       if(!explored.includes(neighbor.index)) {
+        
+        if(start.index != current.index){
 
-        if(!lines[current.line].includes(neighbor.index) && start.index != current.index) {
+          for(let j = 0; j < lines.length; j++) {
+            if(lines[j].includes(neighbor.index)) {
+              neighbor.line = j
+              break
+            }
+          }
+        } else if(!lines[current.line].includes(neighbor.index)) {
           changeLine = 4
           
           for(let j = 0; j < lines.length; j++) {
@@ -107,6 +115,8 @@ function Astar(start: node, end: node, line: number) {
               break
             }
           }
+        } else {
+          neighbor.line = current.line
         }
         
         neighbor.gCost = tree[current.index].gCost + neighbor.gCost + changeLine
