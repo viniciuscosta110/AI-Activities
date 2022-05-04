@@ -50,6 +50,7 @@ class node {
   public gCost : number = Number.MAX_VALUE
   public fCost : number = Number.MAX_VALUE
   public hCost : number = 0
+  public line : number = 0
   
   public neighbors = new Array<node>()
 
@@ -69,6 +70,7 @@ const compare: IGetCompareValue<node> = (node) => node.fCost;
 function Astar(start: node, end: node, line: number) {
   start.gCost = 0
   start.fCost = start.hCost
+  start.line = line
 
   let frontier = new MinPriorityQueue<node>(compare)
   frontier.enqueue(start)
@@ -84,7 +86,7 @@ function Astar(start: node, end: node, line: number) {
     explored.push(current.index)
     steps++
 
-    console.log("Nó atual: "+ (current.index + 1))
+    console.log("Nó atual: "+ (current.index + 1) + "       " + "Linha Atual: " + (current.line + 1))
 
     if(current.index == end.index) {
       console.log("Steps: " + steps)
@@ -96,12 +98,12 @@ function Astar(start: node, end: node, line: number) {
       
       if(!explored.includes(neighbor.index)) {
 
-        if(!lines[line].includes(neighbor.index)) {
+        if(!lines[current.line].includes(neighbor.index) && start.index != current.index) {
           changeLine = 4
           
           for(let j = 0; j < lines.length; j++) {
             if(lines[j].includes(neighbor.index)) {
-              line = j
+              neighbor.line = j
               break
             }
           }
@@ -126,12 +128,11 @@ function Astar(start: node, end: node, line: number) {
 }
 
 function main() {
-  let start = 12
-  let end = 9
+  let start = 0
+  let end = 8
   let line = 0
   
   let n = adjacencyList[0].length
-
 
   for(let i = 0; i < n; i++) {
     let newnode = new node(i, distancesGraph[i][end])
